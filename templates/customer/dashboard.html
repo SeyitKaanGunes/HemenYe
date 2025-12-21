@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Müşteri Paneli | HemenYe{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-12 mb-3">
+    <h3>Hoş geldin, {{ current_user.name }}</h3>
+    <p class="text-muted">Favori restoranlarını incele, son siparişlerini takip et.</p>
+  </div>
+  <div class="col-lg-6 mb-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="card-title">Favori Restoranlar</h5>
+        <ul class="list-group list-group-flush">
+          {% for r in favorite_restaurants %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>{{ r.name }}</span>
+              <a class="btn btn-sm btn-outline-primary" href="/customer/restaurants/{{ r.id }}">Gör</a>
+            </li>
+          {% else %}
+            <li class="list-group-item text-muted">Favori restoran yok.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6 mb-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="card-title">Son Siparişler</h5>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr><th>Restoran</th><th>Tarih</th><th>Durum</th><th></th></tr>
+            </thead>
+            <tbody>
+              {% for o in recent_orders %}
+                <tr>
+                  <td>{{ o.restaurant_name }}</td>
+                  <td>{{ o.created_at }}</td>
+                  <td><span class="badge bg-secondary">{{ o.status }}</span></td>
+                  <td><a class="btn btn-link btn-sm" href="/customer/orders/{{ o.id }}">Detay</a></td>
+                </tr>
+              {% else %}
+                <tr><td colspan="4" class="text-muted">Henüz sipariş yok.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

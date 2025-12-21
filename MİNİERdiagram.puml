@@ -1,0 +1,142 @@
+@startuml
+
+' === ÇEKİRDEKTEN REFERANS ENTİTY'LER ===
+entity User {
+  * user_id : INT
+  --
+  name : VARCHAR
+  email : VARCHAR
+  role : ENUM
+}
+
+entity Restaurant {
+  * restaurant_id : INT
+  --
+  name : VARCHAR
+}
+
+entity Product {
+  * product_id : INT
+  --
+  restaurant_id : INT
+  name : VARCHAR
+  base_price : DECIMAL
+}
+
+entity "Order" as Order {
+  * order_id : INT
+  --
+  user_id : INT
+  restaurant_branch_id : INT
+  coupon_id : INT
+  status : ENUM
+  total_amount : DECIMAL
+  final_amount : DECIMAL
+}
+
+' === KUPON SİSTEMİ ===
+entity Coupon {
+  * coupon_id : INT
+  --
+  code : VARCHAR
+  discount_type : ENUM
+  value : DECIMAL
+  min_order_amount : DECIMAL
+  valid_from : DATETIME
+  valid_to : DATETIME
+  max_usage_per_user : INT
+  is_active : BOOL
+}
+
+entity UserCoupon {
+  * user_id : INT
+  * coupon_id : INT
+  --
+  usage_count : INT
+}
+
+' === FAVORİLER ===
+entity FavoriteRestaurant {
+  * user_id : INT
+  * restaurant_id : INT
+}
+
+entity FavoriteProduct {
+  * user_id : INT
+  * product_id : INT
+}
+
+' === YORUM & CEVAP ===
+entity Review {
+  * review_id : INT
+  --
+  order_id : INT
+  user_id : INT
+  restaurant_id : INT
+  rating : INT
+  comment : TEXT
+  created_at : DATETIME
+}
+
+entity ReviewReply {
+  * reply_id : INT
+  --
+  review_id : INT
+  owner_id : INT
+  message : TEXT
+  created_at : DATETIME
+}
+
+' === ORDER STATUS HISTORY ===
+entity OrderStatusHistory {
+  * history_id : INT
+  --
+  order_id : INT
+  old_status : ENUM
+  new_status : ENUM
+  changed_at : DATETIME
+  changed_by_user_id : INT
+}
+
+' === PRODUCT PRICE HISTORY ===
+entity ProductPriceHistory {
+  * price_history_id : INT
+  --
+  product_id : INT
+  old_price : DECIMAL
+  new_price : DECIMAL
+  changed_at : DATETIME
+  changed_by_user_id : INT
+}
+
+' === İLİŞKİLER ===
+
+' Kuponlar
+Coupon ||--o{ Order : "used_in"
+User ||--o{ UserCoupon : "has"
+Coupon ||--o{ UserCoupon : "assigned_to"
+
+' Favoriler
+User ||--o{ FavoriteRestaurant : "favorites"
+Restaurant ||--o{ FavoriteRestaurant : "favorited_by"
+
+User ||--o{ FavoriteProduct : "favorites"
+Product ||--o{ FavoriteProduct : "favorited_in"
+
+' Yorumlar
+User ||--o{ Review : "writes"
+Restaurant ||--o{ Review : "gets"
+Order ||--o{ Review : "for"
+
+Review ||--o| ReviewReply : "has_reply"
+User ||--o{ ReviewReply : "writes"
+
+' Sipariş durum geçmişi
+Order ||--o{ OrderStatusHistory : "has_status_history"
+User ||--o{ OrderStatusHistory : "changes_status"
+
+' Fiyat geçmişi
+Product ||--o{ ProductPriceHistory : "has_price_history"
+User ||--o{ ProductPriceHistory : "changes_price"
+
+@enduml

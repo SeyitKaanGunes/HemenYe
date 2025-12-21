@@ -1,0 +1,35 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-semibold" href="{{ url_for('home') }}">HemenYe</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        {% if current_user.is_authenticated %}
+          <li class="nav-item me-2 d-flex align-items-center text-muted small">
+            Merhaba, {{ current_user.name }}
+          </li>
+          {% if current_user.role == 'customer' %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('customer_restaurants') }}">Restoranlar</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('customer_cart') }}">Sepetim</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('customer_orders') }}">Siparişlerim</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('customer_addresses') }}">Adreslerim</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('customer_favorites') }}">Favorilerim</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('customer_support') }}">Destek</a></li>
+          {% elif current_user.role == 'restaurant_owner' %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('restaurant_dashboard') }}">Panel</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('restaurant_menu') }}">Menü</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('restaurant_orders') }}">Siparişler</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('restaurant_reviews') }}">Yorumlar</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('restaurant_support') }}">Destek</a></li>
+          {% endif %}
+          <li class="nav-item"><a class="nav-link text-danger" href="{{ url_for('logout') }}">Çıkış Yap</a></li>
+        {% else %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('customer_login') }}">Giriş Yap</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('customer_register') }}">Kayıt Ol</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

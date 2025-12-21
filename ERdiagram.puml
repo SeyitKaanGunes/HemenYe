@@ -1,0 +1,94 @@
+@startuml
+
+entity User {
+  * user_id : INT
+  --
+  name : VARCHAR
+  email : VARCHAR
+  password_hash : VARCHAR
+  phone : VARCHAR
+  role : ENUM
+  created_at : DATETIME
+}
+
+entity Restaurant {
+  * restaurant_id : INT
+  --
+  owner_id : INT
+  name : VARCHAR
+  tax_number : VARCHAR
+  phone : VARCHAR
+  is_active : BOOL
+}
+
+entity RestaurantBranch {
+  * branch_id : INT
+  --
+  restaurant_id : INT
+  neighborhood_id : INT
+  address_line : VARCHAR
+  phone : VARCHAR
+  min_order_amount : DECIMAL
+  is_active : BOOL
+}
+
+entity Product {
+  * product_id : INT
+  --
+  restaurant_id : INT
+  category_id : INT
+  name : VARCHAR
+  base_price : DECIMAL
+  is_active : BOOL
+}
+
+entity Order {
+  * order_id : INT
+  --
+  user_id : INT
+  branch_id : INT
+  address_id : INT
+  coupon_id : INT
+  status : ENUM
+  total_amount : DECIMAL
+  final_amount : DECIMAL
+}
+
+entity OrderItem {
+  * order_item_id : INT
+  --
+  order_id : INT
+  product_id : INT
+  unit_price : DECIMAL
+  quantity : INT
+}
+
+entity Review {
+  * review_id : INT
+  --
+  order_id : INT
+  user_id : INT
+  restaurant_id : INT
+  rating : INT
+}
+
+entity SupportTicket {
+  * ticket_id : INT
+  --
+  user_id : INT
+  order_id : INT
+  status : ENUM
+}
+
+User ||--o{ Restaurant : owns
+Restaurant ||--o{ RestaurantBranch : has
+Restaurant ||--o{ Product : offers
+User ||--o{ Order : places
+RestaurantBranch ||--o{ Order : receives
+Order ||--o{ OrderItem : contains
+User ||--o{ Review : writes
+Restaurant ||--o{ Review : gets
+User ||--o{ SupportTicket : opens
+Order ||--o{ SupportTicket : related_to
+
+@enduml

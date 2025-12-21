@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Restoranlar | HemenYe{% endblock %}
+{% block content %}
+<div class="row mb-3">
+  <div class="col-lg-3">
+    <label class="form-label">Mutfak Türü</label>
+    <select class="form-select">
+      <option value="">Hepsi</option>
+      {% for c in cuisines %}
+        <option value="{{ c.id }}">{{ c.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-lg-3">
+    <label class="form-label">Minimum Puan</label>
+    <select class="form-select">
+      {% for s in [1,2,3,4,5] %}
+        <option value="{{ s }}">{{ s }}+</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-lg-3">
+    <label class="form-label">Sıralama</label>
+    <select class="form-select">
+      <option>En çok puanlanan</option>
+      <option>En çok sipariş alan</option>
+      <option>En düşük min. paket</option>
+    </select>
+  </div>
+</div>
+
+<div class="row g-3">
+  {% for r in restaurants %}
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5>{{ r.name }}</h5>
+          <p class="text-muted small mb-1">{{ r.cuisines|join(', ') }}</p>
+          <p class="mb-2">Puan: <strong>{{ r.avg_rating }}</strong> · Min: {{ r.min_order }}</p>
+          <a class="btn btn-outline-primary w-100" href="/customer/restaurants/{{ r.id }}">Detayları gör</a>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="col-12 text-muted">Restoran bulunamadı.</div>
+  {% endfor %}
+</div>
+{% endblock %}

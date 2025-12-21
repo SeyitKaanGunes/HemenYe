@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Yorumlar | HemenYe{% endblock %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h4 class="mb-3">Yorumlar</h4>
+    <ul class="list-group list-group-flush">
+      {% for rev in reviews %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <div>
+              <strong>{{ rev.user_name }}</strong> · <span class="text-warning">★ {{ rev.rating }}</span>
+              <p class="mb-1">{{ rev.comment }}</p>
+              <small class="text-muted">{{ rev.created_at }}</small>
+            </div>
+          </div>
+          {% if rev.reply %}
+            <div class="mt-2 ps-3 border-start">
+              <small class="text-muted">Cevabın:</small>
+              <p class="mb-0">{{ rev.reply }}</p>
+            </div>
+          {% else %}
+            <form class="mt-2" action="/restaurant/reviews/{{ rev.id }}/reply" method="POST">
+              <div class="input-group">
+                <input type="text" class="form-control" name="reply" placeholder="Cevap yaz...">
+                <button class="btn btn-outline-primary">Gönder</button>
+              </div>
+            </form>
+          {% endif %}
+        </li>
+      {% else %}
+        <li class="list-group-item text-muted">Henüz yorum yok.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

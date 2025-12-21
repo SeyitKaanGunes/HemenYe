@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Favorilerim | HemenYe{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card glass">
+      <div class="card-body">
+        <div class="section-title">
+          <h5>Favori Restoranlar</h5>
+          <small>{{ fav_restaurants|length }} adet</small>
+        </div>
+        {% if fav_restaurants %}
+          <div class="list-group list-group-flush">
+            {% for r in fav_restaurants %}
+              <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="fw-semibold">{{ r.name }}</div>
+                  <div class="text-muted small">{{ r.phone or 'Telefon yok' }}</div>
+                </div>
+                <form action="{{ url_for('customer.toggle_favorite_restaurant', restaurant_id=r.id) }}" method="POST">
+                  <button class="btn btn-sm btn-outline-danger">Sil</button>
+                </form>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted mb-0">Henüz favori restoran yok.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card glass">
+      <div class="card-body">
+        <div class="section-title">
+          <h5>Favori Ürünler</h5>
+          <small>{{ fav_products|length }} adet</small>
+        </div>
+        {% if fav_products %}
+          <div class="list-group list-group-flush">
+            {% for p in fav_products %}
+              <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="fw-semibold">{{ p.name }}</div>
+                  <div class="text-muted small">{{ p.restaurant.name }}</div>
+                </div>
+                <form action="{{ url_for('customer.toggle_favorite_product', product_id=p.id) }}" method="POST">
+                  <button class="btn btn-sm btn-outline-danger">Sil</button>
+                </form>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted mb-0">Henüz favori ürün yok.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+@startuml
+
+' === ÇEKİRDEKTEN REFERANS ENTİTY'LER ===
+entity User {
+  * user_id : INT
+  --
+  name : VARCHAR
+}
+
+entity Restaurant {
+  * restaurant_id : INT
+  --
+  owner_id : INT
+  name : VARCHAR
+}
+
+entity "RestaurantBranch" as RestaurantBranch {
+  * branch_id : INT
+  --
+  restaurant_id : INT
+  neighborhood_id : INT
+  address_line : VARCHAR
+  min_order_amount : DECIMAL
+}
+
+' === ADRES HİYERARŞİSİ ===
+entity City {
+  * city_id : INT
+  --
+  name : VARCHAR
+}
+
+entity District {
+  * district_id : INT
+  --
+  city_id : INT
+  name : VARCHAR
+}
+
+entity Neighborhood {
+  * neighborhood_id : INT
+  --
+  district_id : INT
+  name : VARCHAR
+}
+
+entity UserAddress {
+  * address_id : INT
+  --
+  user_id : INT
+  neighborhood_id : INT
+  title : VARCHAR
+  address_line : VARCHAR
+  is_default : BOOL
+}
+
+' === MUTFAK TÜRÜ ===
+entity CuisineType {
+  * cuisine_id : INT
+  --
+  name : VARCHAR
+}
+
+entity RestaurantCuisine {
+  * restaurant_id : INT
+  * cuisine_id : INT
+}
+
+' === KATEGORİ VE ÜRÜN ===
+entity ProductCategory {
+  * category_id : INT
+  --
+  restaurant_id : INT
+  parent_category_id : INT
+  name : VARCHAR
+}
+
+entity Product {
+  * product_id : INT
+  --
+  restaurant_id : INT
+  category_id : INT
+  name : VARCHAR
+  description : TEXT
+  base_price : DECIMAL
+  is_active : BOOL
+}
+
+' === OPSİYON SİSTEMİ ===
+entity ProductOptionGroup {
+  * option_group_id : INT
+  --
+  restaurant_id : INT
+  name : VARCHAR
+  is_required : BOOL
+  min_select : INT
+  max_select : INT
+}
+
+entity ProductOption {
+  * option_id : INT
+  --
+  option_group_id : INT
+  name : VARCHAR
+  extra_price : DECIMAL
+  is_active : BOOL
+}
+
+entity Product_ProductOptionGroup {
+  * product_id : INT
+  * option_group_id : INT
+}
+
+' === İLİŞKİLER ===
+
+' Adres hiyerarşi
+City ||--o{ District : "has"
+District ||--o{ Neighborhood : "has"
+
+Neighborhood ||--o{ UserAddress : "used_in"
+Neighborhood ||--o{ RestaurantBranch : "used_in"
+
+User ||--o{ UserAddress : "has"
+
+Restaurant ||--o{ RestaurantBranch : "has"
+
+' Mutfak türü
+Restaurant ||--o{ RestaurantCuisine : "tagged_as"
+CuisineType ||--o{ RestaurantCuisine : "used_by"
+
+' Kategori & ürün
+Restaurant ||--o{ ProductCategory : "has_category"
+ProductCategory ||--o{ Product : "has_product"
+ProductCategory ||--o{ ProductCategory : "parent_of"
+
+Restaurant ||--o{ Product : "offers"
+
+' Opsiyon sistemi
+Restaurant ||--o{ ProductOptionGroup : "defines"
+ProductOptionGroup ||--o{ ProductOption : "has"
+
+Product ||--o{ Product_ProductOptionGroup : "uses_group"
+ProductOptionGroup ||--o{ Product_ProductOptionGroup : "linked_to"
+
+@enduml

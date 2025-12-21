@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Restoran Paneli | HemenYe{% endblock %}
+{% block content %}
+<div class="row mb-3">
+  <div class="col-12">
+    <h3>{{ restaurant.name }} Paneli</h3>
+    <p class="text-muted">Hızlı istatistikler ve kısayollar.</p>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <p class="text-muted small mb-1">Toplam Sipariş</p>
+        <h4>{{ stats.total_orders }}</h4>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <p class="text-muted small mb-1">Bugünkü Sipariş</p>
+        <h4>{{ stats.today_orders }}</h4>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <p class="text-muted small mb-1">Ortalama Puan</p>
+        <h4>{{ stats.avg_rating }}</h4>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-md-3"><a class="btn btn-outline-primary w-100" href="/restaurant/menu">Menüyü Yönet</a></div>
+  <div class="col-md-3"><a class="btn btn-outline-primary w-100" href="/restaurant/orders">Siparişleri Gör</a></div>
+  <div class="col-md-3"><a class="btn btn-outline-primary w-100" href="/restaurant/reviews">Yorumlar</a></div>
+  <div class="col-md-3"><a class="btn btn-outline-primary w-100" href="/restaurant/support">Destek Talepleri</a></div>
+</div>
+{% endblock %}

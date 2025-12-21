@@ -1,0 +1,77 @@
+@startuml
+
+class User {
+  +id : int
+  +name : string
+  +email : string
+  +role : Role
+  +login()
+  +register()
+}
+
+class Customer {
+  +addAddress()
+  +placeOrder()
+}
+class RestaurantOwner {
+  +createRestaurant()
+  +addProduct()
+}
+
+User <|-- Customer
+User <|-- RestaurantOwner
+
+class Restaurant {
+  +id : int
+  +name : string
+  +addBranch()
+  +getActiveMenu()
+}
+
+class RestaurantBranch {
+  +id : int
+  +minOrderAmount : decimal
+  +isOpenAt(time)
+}
+
+class Product {
+  +id : int
+  +name : string
+  +basePrice : decimal
+  +changePrice(newPrice)
+}
+
+class Order {
+  +id : int
+  +status : OrderStatus
+  +addItem()
+  +applyCoupon()
+  +changeStatus()
+}
+
+class OrderItem {
+  +quantity : int
+  +unitPrice : decimal
+}
+
+class Coupon {
+  +code : string
+  +isValidFor(order)
+  +calculateDiscount(total)
+}
+
+class Review
+class SupportTicket
+class SupportMessage
+
+Customer "1" -- "0..*" Order : places
+RestaurantOwner "1" -- "1..*" Restaurant : owns
+Restaurant "1" -- "1..*" RestaurantBranch : has
+Restaurant "1" -- "0..*" Product : offers
+Order "1" -- "1..*" OrderItem : contains
+Order "0..*" -- "0..1" Coupon : uses
+Order "1" -- "0..1" Review : gets
+Customer "1" -- "0..*" SupportTicket : opens
+SupportTicket "1" -- "1..*" SupportMessage : has
+
+@enduml

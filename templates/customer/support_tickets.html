@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Destek Talepleri | HemenYe{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Talepler</h5>
+          <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#newTicketModal">Yeni Talep</button>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for t in tickets %}
+            <li class="list-group-item d-flex justify-content-between">
+              <div>
+                <div>#{{ t.id }} · {{ t.order_ref }}</div>
+                <small class="text-muted">{{ t.created_at }}</small>
+              </div>
+              <span class="badge bg-secondary">{{ t.status }}</span>
+            </li>
+          {% else %}
+            <li class="list-group-item text-muted">Destek talebi yok.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5>Mesajlar</h5>
+        <div class="border rounded p-3 mb-3" style="max-height: 300px; overflow-y: auto;">
+          {% for m in messages %}
+            <div class="mb-2">
+              <small class="text-muted">{{ m.sender_type }} · {{ m.created_at }}</small>
+              <div>{{ m.body }}</div>
+            </div>
+          {% else %}
+            <p class="text-muted mb-0">Mesaj yok.</p>
+          {% endfor %}
+        </div>
+        <form action="/customer/support/send" method="POST">
+          <div class="mb-2">
+            <textarea name="body" class="form-control" rows="2" placeholder="Mesajınızı yazın"></textarea>
+          </div>
+          <button class="btn btn-primary">Gönder</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Yeni Ticket Modal -->
+<div class="modal fade" id="newTicketModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="/customer/support/new" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title">Yeni Destek Talebi</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">İlgili Sipariş</label>
+            <select name="order_id" class="form-select">
+              {% for o in orders %}
+                <option value="{{ o.id }}">#{{ o.id }} - {{ o.restaurant_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Konu</label>
+            <input type="text" name="subject" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Mesaj</label>
+            <textarea name="body" class="form-control" rows="3" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+          <button class="btn btn-primary">Gönder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

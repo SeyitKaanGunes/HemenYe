@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Sipariş Özeti | HemenYe{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h4>Sipariş Özeti</h4>
+        <p class="mb-1">Teslimat Adresi: {{ selected_address }}</p>
+        <p class="mb-3">Restoran: {{ restaurant.name }}</p>
+        <ul class="list-group mb-3">
+          {% for item in order_items %}
+            <li class="list-group-item d-flex justify-content-between">
+              <div>
+                <div>{{ item.name }}</div>
+                <small class="text-muted">Adet: {{ item.quantity }}</small>
+              </div>
+              <strong>{{ item.total_price }}</strong>
+            </li>
+          {% endfor %}
+        </ul>
+        <ul class="list-group mb-3">
+          <li class="list-group-item d-flex justify-content-between"><span>Ara Toplam</span><strong>{{ totals.subtotal }}</strong></li>
+          <li class="list-group-item d-flex justify-content-between"><span>İndirim</span><strong>{{ totals.discount }}</strong></li>
+          <li class="list-group-item d-flex justify-content-between"><span>Genel Toplam</span><strong>{{ totals.total }}</strong></li>
+        </ul>
+        <div class="mb-3">
+          <label class="form-label">Sipariş Durumu</label>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar" role="progressbar" style="width: {{ progress_percent }}%;"></div>
+          </div>
+          <small class="text-muted">Durum: {{ order.status }}</small>
+        </div>
+        <form action="/customer/order/complete" method="POST">
+          <button class="btn btn-primary">Onayla</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

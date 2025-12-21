@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HemenYe | Restoran Sahibi Giriş</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="auth-page">
+  <main class="auth-container">
+    <div class="card surface">
+      <p class="eyebrow">RESTORAN SAHİBİ</p>
+      <h2>Giriş / Üye Ol</h2>
+      <form id="owner-register-form" class="stacked">
+        <label>İsim <input type="text" id="own-name" placeholder="Ad Soyad" required></label>
+        <label>E-posta <input type="email" id="own-email" placeholder="owner@mail.com" required></label>
+        <label>Şifre <input type="password" id="own-pass" placeholder="********" required></label>
+        <div class="actions-row">
+          <button type="submit" class="pill primary">Üye Ol</button>
+          <button type="button" class="pill ghost" id="own-login-btn">Giriş Yap</button>
+        </div>
+        <div id="own-status" class="status"></div>
+      </form>
+      <p class="muted small">Ana sayfaya dön: <a href="{{ url_for('home') }}">Restoran listesi</a></p>
+    </div>
+  </main>
+  <script src="{{ url_for('static', filename='auth.js') }}"></script>
+  <script>setupAuth('owner');</script>
+</body>
+</html>

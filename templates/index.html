@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YemekYe | Restoran ve Menü Uygulaması</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script defer src="{{ url_for('static', filename='app.js') }}"></script>
+</head>
+<body>
+  <div class="ambient"></div>
+
+  <nav class="topbar">
+    <div class="brand">
+      <div class="logo-dot"></div>
+      <div>
+        <strong>YemekYe</strong>
+        <small>DB Systems Project</small>
+      </div>
+    </div>
+    <div class="role-switch">
+      <button class="segmented active" data-role="customer" id="role-customer-btn">Sipariş Veren</button>
+      <button class="segmented" data-role="owner" id="role-owner-btn">Restoran Sahibi</button>
+    </div>
+  </nav>
+
+  <div id="role-overlay" class="overlay show">
+    <div class="dialog">
+      <p class="eyebrow">Rolüne karar ver</p>
+      <h2>Uygulamaya giriş yapmadan önce tarafını seç</h2>
+      <p class="lead">Sipariş veren olarak menüden ürün ekle ve ödeme adımına kadar ilerle veya restoran sahibi olarak gelen siparişleri gör, menünü güncelle.</p>
+      <div class="role-actions">
+        <button class="pill primary large" data-role="customer" id="overlay-customer">Ben sipariş veriyorum</button>
+        <a class="pill ghost large" href="{{ url_for('restaurant_login') }}">Ben restoran sahibiyim</a>
+      </div>
+      <p class="muted small">Seçimini daha sonra üstteki rol butonlarıyla değiştirebilirsin.</p>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div>
+      <p class="eyebrow">database sistemleri dersi projesi</p>
+      <h1>YemekYe ile tek ekranda sipariş ve işletme yönetimi</h1>
+      <p class="lead">Müşteri tarafında menüden ürün ekle, yorum bırak. Restoran tarafında sipariş listeni takip et, menüne yeni ürünler ekle.</p>
+      <div class="hero-actions">
+        <button class="pill primary" id="cta-start">Restoranları Göster</button>
+        <span class="badge">rol üst çubuktan değiştirilebilir</span>
+      </div>
+    </div>
+    <div class="hero-bento">
+      <div class="bento-card">
+        <p>En düşük sipariş</p>
+        <strong>₺100 - ₺200</strong>
+      </div>
+      <div class="bento-card">
+        <p>Hızlı teslimat</p>
+        <strong>25-55 dk</strong>
+      </div>
+      <div class="bento-card">
+        <p>Gerçek kullanıcı yorumları</p>
+        <strong>Canlı ekleme</strong>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <div id="customer-view">
+      </div>
+
+    <div id="owner-view" class="hidden">
+      </div>
+  </main>
+</body>
+</html>

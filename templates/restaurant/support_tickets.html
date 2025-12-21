@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Destek Talepleri | Restoran{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="mb-3">Talepler</h5>
+        <ul class="list-group list-group-flush">
+          {% for t in tickets %}
+            <li class="list-group-item d-flex justify-content-between">
+              <div>
+                <div>#{{ t.id }} · {{ t.order_ref }}</div>
+                <small class="text-muted">{{ t.created_at }}</small>
+              </div>
+              <span class="badge bg-secondary">{{ t.status }}</span>
+            </li>
+          {% else %}
+            <li class="list-group-item text-muted">Talep yok.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5>Mesajlar</h5>
+        <div class="border rounded p-3 mb-3" style="max-height: 300px; overflow-y: auto;">
+          {% for m in messages %}
+            <div class="mb-2">
+              <small class="text-muted">{{ m.sender_type }} · {{ m.created_at }}</small>
+              <div>{{ m.body }}</div>
+            </div>
+          {% else %}
+            <p class="text-muted mb-0">Mesaj yok.</p>
+          {% endfor %}
+        </div>
+        <form action="/restaurant/support/send" method="POST">
+          <div class="mb-2">
+            <textarea name="body" class="form-control" rows="2" placeholder="Cevap yazın"></textarea>
+          </div>
+          <button class="btn btn-primary">Gönder</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

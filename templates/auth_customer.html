@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HemenYe | Müşteri Giriş</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="auth-page">
+  <main class="auth-container">
+    <div class="card surface">
+      <p class="eyebrow">MÜŞTERİ</p>
+      <h2>Giriş / Üye Ol</h2>
+      <form id="customer-register-form" class="stacked">
+        <label>İsim <input type="text" id="cust-name" placeholder="Ad Soyad" required></label>
+        <label>E-posta <input type="email" id="cust-email" placeholder="ornek@mail.com" required></label>
+        <label>Şifre <input type="password" id="cust-pass" placeholder="********" required></label>
+        <div class="actions-row">
+          <button type="submit" class="pill primary">Üye Ol</button>
+          <button type="button" class="pill ghost" id="cust-login-btn">Giriş Yap</button>
+        </div>
+        <div id="cust-status" class="status"></div>
+      </form>
+      <p class="muted small">Restoran listesine dön: <a href="{{ url_for('home') }}">Ana sayfa</a></p>
+    </div>
+  </main>
+  <script src="{{ url_for('static', filename='auth.js') }}"></script>
+  <script>setupAuth('customer');</script>
+</body>
+</html>

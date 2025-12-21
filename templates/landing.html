@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}HemenYe | Hoş Geldiniz{% endblock %}
+{% block content %}
+<div class="row align-items-center justify-content-center landing-hero">
+  <div class="col-md-10 col-lg-8 text-center">
+    <h1 class="mb-3">Tek ekranda sipariş verin ya da restoranınızı yönetin</h1>
+    <p class="text-muted mb-4">Müşteriler için hızlı sipariş, restoran sahipleri için basit yönetim.</p>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h4>Müşteriyim</h4>
+            <p class="text-muted">Restoranları keşfet, sipariş ver.</p>
+            <a class="btn btn-primary w-100" href="{{ url_for('customer_login') }}">Giriş Yap</a>
+            <a class="btn btn-outline-secondary w-100 mt-2" href="{{ url_for('customer_register') }}">Kayıt Ol</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h4>Restoran Sahibiyim</h4>
+            <p class="text-muted">Restoranını ekle, menünü yönet, sipariş al.</p>
+            <a class="btn btn-success w-100" href="{{ url_for('restaurant_login') }}">Giriş Yap</a>
+            <a class="btn btn-outline-secondary w-100 mt-2" href="{{ url_for('restaurant_register') }}">Kayıt Ol</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

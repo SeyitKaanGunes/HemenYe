@@ -1,0 +1,170 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Manrope:wght@400;600;700&display=swap");
+
+:root {
+  --bg: #0f172a;
+  --panel: rgba(255, 255, 255, 0.94);
+  --muted: #6b7280;
+  --text: #0f172a;
+  --border: rgba(15, 23, 42, 0.07);
+  --accent: #f97316;
+  --accent-2: #6366f1;
+  --success: #10b981;
+  --radius: 18px;
+  --shadow: 0 25px 90px rgba(15, 23, 42, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Sora", "Manrope", system-ui, -apple-system, sans-serif;
+  background: radial-gradient(circle at 20% 20%, rgba(249, 115, 22, 0.12) 0, transparent 30%),
+    radial-gradient(circle at 85% 10%, rgba(99, 102, 241, 0.12) 0, transparent 28%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  min-height: 100vh;
+  color: var(--text);
+}
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+  margin: 14px;
+}
+
+.navbar .navbar-brand {
+  letter-spacing: -0.02em;
+}
+
+.navbar .nav-link {
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus {
+  color: var(--text);
+}
+
+.container {
+  max-width: 1140px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  letter-spacing: -0.015em;
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.16);
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #fb923c);
+  border: none;
+  box-shadow: 0 15px 40px rgba(249, 115, 22, 0.3);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.btn-outline-primary {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.btn-outline-primary:hover {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 15px 40px rgba(249, 115, 22, 0.3);
+}
+
+.badge {
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 700;
+}
+
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.08);
+  color: #4338ca;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.alert {
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  background: var(--panel);
+}
+
+.auth-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.glass {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
+}
+
+.section-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.section-title small {
+  color: var(--muted);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(226, 232, 240, 0.7), rgba(226, 232, 240, 0.4), rgba(226, 232, 240, 0.7));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 10px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Restoran Siparişleri | HemenYe{% endblock %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h4 class="mb-3">Siparişler</h4>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr><th>#</th><th>Müşteri</th><th>Tutar</th><th>Durum</th><th>Oluşturulma</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for o in orders %}
+            <tr>
+              <td>{{ o.id }}</td>
+              <td>{{ o.customer_name }}</td>
+              <td>{{ o.total }}</td>
+              <td>
+                <form action="/restaurant/orders/{{ o.id }}/status" method="POST" class="d-flex align-items-center gap-2">
+                  <select name="status" class="form-select form-select-sm">
+                    {% for s in ['PENDING','CONFIRMED','PREPARING','ON_THE_WAY','DELIVERED','CANCELED'] %}
+                      <option value="{{ s }}" {% if o.status == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                  </select>
+                  <button class="btn btn-sm btn-outline-primary">Kaydet</button>
+                </form>
+              </td>
+              <td>{{ o.created_at }}</td>
+              <td><a class="btn btn-sm btn-outline-secondary" href="/restaurant/orders/{{ o.id }}">Detay</a></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6" class="text-muted">Sipariş bulunamadı.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
