@@ -46,12 +46,17 @@
           </div>
           <div class="mb-3">
             <label class="form-label">Mahalle</label>
-            <select class="form-select" name="neighborhood_id" required>
-              <option value="">Seçin</option>
-              {% for n in neighborhoods %}
-                <option value="{{ n.id }}">{{ n.name }}</option>
-              {% endfor %}
-            </select>
+            {% if neighborhoods %}
+              <select class="form-select" name="neighborhood_id" required>
+                <option value="">Seçin</option>
+                {% for n in neighborhoods %}
+                  <option value="{{ n.id }}">{{ n.name }}</option>
+                {% endfor %}
+              </select>
+            {% else %}
+              <input class="form-control" name="neighborhood_name" placeholder="Mahalle adı girin" required>
+              <div class="form-text">Liste boşsa mahalleyi elle ekleyebilirsin.</div>
+            {% endif %}
           </div>
           <div class="form-check mb-3">
             <input class="form-check-input" type="checkbox" value="1" id="is_default" name="is_default">

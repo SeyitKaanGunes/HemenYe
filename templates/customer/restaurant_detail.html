@@ -8,8 +8,11 @@
         <div class="d-flex justify-content-between align-items-start">
           <div>
             <h3 class="mb-1">{{ restaurant.name }}</h3>
-            <p class="text-muted mb-1">{{ restaurant.description }}</p>
-            <p class="mb-0">Adres: {{ restaurant.address }} • Puan: <strong>{{ restaurant.rating }}</strong></p>
+            <p class="text-muted mb-1">Phone: {{ restaurant.phone or '-' }}</p>
+            <p class="mb-0">
+              Address: {{ branch.address_line if branch else 'Address not set' }}
+              | Rating: <strong>{{ avg_rating }}</strong>
+            </p>
           </div>
           {% if current_user.is_authenticated and current_user.role == 'customer' %}
             <form action="{{ url_for('customer.toggle_favorite_restaurant', restaurant_id=restaurant.id) }}" method="POST">
@@ -51,6 +54,9 @@
         {% endfor %}
       </div>
     {% endfor %}
+    {% if not categories %}
+      <div class="text-muted">No menu categories yet.</div>
+    {% endif %}
   </div>
   <div class="col-lg-4">
     <div class="card glass">

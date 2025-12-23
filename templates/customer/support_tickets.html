@@ -16,7 +16,7 @@
                 <div>#{{ t.id }} · {{ t.order_ref }}</div>
                 <small class="text-muted">{{ t.created_at }}</small>
               </div>
-              <span class="badge bg-secondary">{{ t.status }}</span>
+              <span class="badge bg-secondary">{{ t.status|replace('_', ' ')|title }}</span>
             </li>
           {% else %}
             <li class="list-group-item text-muted">Destek talebi yok.</li>
@@ -64,7 +64,7 @@
             <label class="form-label">İlgili Sipariş</label>
             <select name="order_id" class="form-select">
               {% for o in orders %}
-                <option value="{{ o.id }}">#{{ o.id }} - {{ o.restaurant_name }}</option>
+                <option value="{{ o.id }}">#{{ o.id }} - {{ o.branch.restaurant.name if o.branch and o.branch.restaurant else '-' }}</option>
               {% endfor %}
             </select>
           </div>

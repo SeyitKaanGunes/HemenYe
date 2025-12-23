@@ -252,6 +252,7 @@ class Order(db.Model):
     review = db.relationship("Review", back_populates="order", uselist=False, foreign_keys="Review.order_id")
     tickets = db.relationship("SupportTicket", back_populates="order", foreign_keys="SupportTicket.order_id")
     status_history = db.relationship("OrderStatusHistory", back_populates="order", foreign_keys="OrderStatusHistory.order_id")
+    address = db.relationship("UserAddress", foreign_keys=[address_id])
 
 
 class OrderItem(db.Model):

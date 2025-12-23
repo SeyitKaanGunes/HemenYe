@@ -35,9 +35,9 @@
             <tbody>
               {% for o in recent_orders %}
                 <tr>
-                  <td>{{ o.restaurant_name }}</td>
-                  <td>{{ o.created_at }}</td>
-                  <td><span class="badge bg-secondary">{{ o.status }}</span></td>
+                  <td>{{ o.branch.restaurant.name if o.branch and o.branch.restaurant else '-' }}</td>
+                  <td>-</td>
+                  <td><span class="badge bg-secondary">{{ o.status|replace('_', ' ')|title }}</span></td>
                   <td><a class="btn btn-link btn-sm" href="/customer/orders/{{ o.id }}">Detay</a></td>
                 </tr>
               {% else %}

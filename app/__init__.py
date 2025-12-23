@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.exc import OperationalError
+from dotenv import load_dotenv
 
 from app.config import Config
 from app.extensions import db, login_manager
@@ -18,7 +19,8 @@ def _ensure_database(uri: str) -> None:
     if not database_name:
         return
 
-    admin_url = url.set(database=None)
+    # SQLAlchemy keeps the DB when database=None for MySQL; use empty string to drop it.
+    admin_url = url.set(database="")
     engine = create_engine(admin_url)
     try:
         with engine.connect() as conn:
@@ -32,9 +34,17 @@ def _ensure_database(uri: str) -> None:
         engine.dispose()
 
 
-def create_app() -> Flask:
+def create_app(config_override=None) -> Flask:
+    load_dotenv()
     app = Flask(__name__, template_folder="../templates", static_folder="../static")
     app.config.from_object(Config)
+    if config_override:
+        app.config.update(config_override)
+
+    from app.logging_config import configure_logging
+    from app.errors import register_error_handlers
+
+    configure_logging(app)
 
     # Ensure DB exists (for MySQL) before binding SQLAlchemy.
     _ensure_database(app.config["SQLALCHEMY_DATABASE_URI"])
@@ -59,11 +69,15 @@ def create_app() -> Flask:
     from app.main.routes import main_bp
     from app.customer.routes import customer_bp
     from app.restaurant.routes import restaurant_bp
+    from app.admin.routes import admin_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(customer_bp)
     app.register_blueprint(restaurant_bp)
+    app.register_blueprint(admin_bp)
+
+    register_error_handlers(app)
 
     def add_alias(alias: str, target: str):
         view = app.view_functions.get(target)
@@ -97,6 +111,11 @@ def create_app() -> Flask:
         "restaurant_orders": "restaurant.restaurant_orders",
         "restaurant_reviews": "restaurant.restaurant_reviews",
         "restaurant_support": "restaurant.restaurant_support",
+        "admin_login": "admin.admin_login",
+        "admin_dashboard": "admin.admin_dashboard",
+        "admin_orders": "admin.admin_orders",
+        "admin_restaurants": "admin.admin_restaurants",
+        "admin_products": "admin.admin_products",
     }
     for alias, target in aliases.items():
         add_alias(alias, target)

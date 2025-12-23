@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Admin Restaurants | HemenYe{% endblock %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h4 class="mb-3">Restaurants</h4>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Owner</th>
+            <th>Phone</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in restaurants %}
+            <tr>
+              <td>{{ r.id }}</td>
+              <td>{{ r.name }}</td>
+              <td>{{ r.owner.name if r.owner else '-' }}</td>
+              <td>{{ r.phone or '-' }}</td>
+              <td>
+                {% if r.is_active %}
+                  <span class="badge bg-success">Active</span>
+                {% else %}
+                  <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+              </td>
+              <td>
+                <form action="/admin/restaurants/{{ r.id }}/toggle" method="POST">
+                  <button class="btn btn-sm btn-outline-primary">
+                    {{ 'Deactivate' if r.is_active else 'Activate' }}
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6" class="text-muted">No restaurants found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

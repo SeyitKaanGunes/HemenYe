@@ -1,7 +1,8 @@
 # app/customer/routes.py - customer-facing routes
 from datetime import datetime
-from flask import render_template, redirect, url_for, session, flash, request
+from flask import render_template, redirect, url_for, session, flash, request, abort
 from flask_login import login_required, current_user
+from sqlalchemy import func
 
 from app.customer import customer_bp
 from app.extensions import db
@@ -17,6 +18,10 @@ from app.models import (
     OrderStatus,
     UserAddress,
     Neighborhood,
+    CuisineType,
+    RestaurantCuisine,
+    City,
+    District,
     FavoriteRestaurant,
     FavoriteProduct,
     Coupon,
@@ -24,11 +29,15 @@ from app.models import (
     DiscountType,
     OrderStatusHistory,
 )
+from app.pagination import paginate
+from app.order_status import is_valid_status
 
 
 def customer_required():
-    if not current_user.is_authenticated or current_user.role != UserRole.CUSTOMER:
+    if not current_user.is_authenticated:
         return redirect(url_for("auth.customer_login"))
+    if current_user.role != UserRole.CUSTOMER:
+        abort(403)
     return None
 
 
@@ -103,26 +112,168 @@ def dashboard():
     if gate:
         return gate
     recent_orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.id.desc()).limit(5).all()
-    favorite_restaurants = []
+    favorite_restaurants = (
+        Restaurant.query.join(FavoriteRestaurant, FavoriteRestaurant.restaurant_id == Restaurant.id)
+        .filter(FavoriteRestaurant.user_id == current_user.id)
+        .limit(5)
+        .all()
+    )
     return render_template("customer/dashboard.html", recent_orders=recent_orders, favorite_restaurants=favorite_restaurants)
 
 
 @customer_bp.route("/customer/restaurants", endpoint="customer_restaurants")
 def restaurant_list():
-    restaurants = Restaurant.query.filter_by(is_active=True).all()
-    cuisines = []  # placeholder
-    return render_template("customer/restaurant_list.html", restaurants=restaurants, cuisines=cuisines)
+    cuisines = CuisineType.query.order_by(CuisineType.name).all()
+    if not cuisines:
+        default_names = ["Turk", "Burger", "Pizza", "Doner", "Tatli", "Kahve"]
+        for name in default_names:
+            db.session.add(CuisineType(name=name))
+        db.session.commit()
+        cuisines = CuisineType.query.order_by(CuisineType.name).all()
 
+    active_restaurants = Restaurant.query.filter_by(is_active=True).all()
+    existing_links = {
+        rest_id for (rest_id,) in db.session.query(RestaurantCuisine.restaurant_id).distinct().all()
+    }
+    missing_restaurants = [r for r in active_restaurants if r.id not in existing_links]
+    if cuisines and missing_restaurants:
+        for restaurant in missing_restaurants:
+            cuisine = cuisines[restaurant.id % len(cuisines)]
+            db.session.add(RestaurantCuisine(restaurant_id=restaurant.id, cuisine_id=cuisine.id))
+        db.session.commit()
 
+    search_query = (request.args.get("q") or "").strip()
+    cuisine_id = request.args.get("cuisine_id", type=int)
+    min_rating = request.args.get("min_rating", type=float)
+    sort = request.args.get("sort") or "rating"
+    if sort not in {"rating", "min_order"}:
+        sort = "rating"
+    if min_rating and (min_rating < 1 or min_rating > 5):
+        min_rating = None
+    cuisine_ids = {c.id for c in cuisines}
+    if cuisine_id and cuisine_id not in cuisine_ids:
+        cuisine_id = None
+    page = request.args.get("page", 1, type=int)
+    per_page = 9
+
+    rating_subq = (
+        db.session.query(Review.restaurant_id.label("restaurant_id"), func.avg(Review.rating).label("avg_rating"))
+        .group_by(Review.restaurant_id)
+        .subquery()
+    )
+    min_order_subq = (
+        db.session.query(
+            RestaurantBranch.restaurant_id.label("restaurant_id"),
+            func.min(RestaurantBranch.min_order_amount).label("min_order"),
+        )
+        .filter(RestaurantBranch.is_active == True)
+        .group_by(RestaurantBranch.restaurant_id)
+        .subquery()
+    )
+
+    query = Restaurant.query.filter_by(is_active=True)
+    if search_query:
+        query = query.filter(Restaurant.name.ilike(f"%{search_query}%"))
+    if cuisine_id:
+        query = query.join(RestaurantCuisine, RestaurantCuisine.restaurant_id == Restaurant.id).filter(
+            RestaurantCuisine.cuisine_id == cuisine_id
+        )
+
+    query = query.outerjoin(rating_subq, rating_subq.c.restaurant_id == Restaurant.id)
+    query = query.outerjoin(min_order_subq, min_order_subq.c.restaurant_id == Restaurant.id)
+
+    if min_rating:
+        query = query.filter(rating_subq.c.avg_rating >= min_rating)
+
+    if sort == "min_order":
+        query = query.order_by(func.coalesce(min_order_subq.c.min_order, 999999).asc(), Restaurant.name.asc())
+    else:
+        query = query.order_by(func.coalesce(rating_subq.c.avg_rating, 0).desc(), Restaurant.name.asc())
+
+    total = query.count()
+    pages = max(1, (total + per_page - 1) // per_page) if total else 1
+    if page < 1:
+        page = 1
+    if page > pages:
+        page = pages
+
+    rows = (
+        query.with_entities(Restaurant, rating_subq.c.avg_rating, min_order_subq.c.min_order)
+        .limit(per_page)
+        .offset((page - 1) * per_page)
+        .all()
+    )
+
+    restaurant_ids = [r.id for r, _, _ in rows]
+    cuisine_map = {}
+    if restaurant_ids:
+        cuisine_rows = (
+            db.session.query(RestaurantCuisine.restaurant_id, CuisineType.name)
+            .join(CuisineType, RestaurantCuisine.cuisine_id == CuisineType.id)
+            .filter(RestaurantCuisine.restaurant_id.in_(restaurant_ids))
+            .all()
+        )
+        for rest_id, cuisine_name in cuisine_rows:
+            cuisine_map.setdefault(rest_id, []).append(cuisine_name)
+
+    restaurant_cards = []
+    for r, avg_rating, min_order in rows:
+        features = []
+        if avg_rating is None:
+            features.append("Yeni")
+        elif avg_rating >= 4.5:
+            features.append("Populer")
+        if min_order is not None and float(min_order) <= 60:
+            features.append("Uygun Min")
+        if len(cuisine_map.get(r.id, [])) >= 2:
+            features.append("Cesitli")
+        restaurant_cards.append(
+            {
+                "id": r.id,
+                "name": r.name,
+                "phone": r.phone,
+                "cuisines": cuisine_map.get(r.id, []),
+                "avg_rating": f"{avg_rating:.1f}" if avg_rating is not None else "-",
+                "min_order": f"{float(min_order):.0f}" if min_order is not None else "-",
+                "features": features,
+            }
+        )
+    return render_template(
+        "customer/restaurant_list.html",
+        restaurants=restaurant_cards,
+        cuisines=cuisines,
+        search_query=search_query,
+        selected_cuisine_id=cuisine_id or "",
+        selected_min_rating=min_rating or "",
+        selected_sort=sort,
+        page=page,
+        pages=pages,
+    )
 @customer_bp.route("/customer/restaurants/<int:restaurant_id>")
 def restaurant_detail(restaurant_id):
     restaurant = Restaurant.query.get_or_404(restaurant_id)
+    branch = RestaurantBranch.query.filter_by(restaurant_id=restaurant_id, is_active=True).first()
+    avg_rating = (
+        db.session.query(func.avg(Review.rating)).filter(Review.restaurant_id == restaurant_id).scalar()
+    )
     categories = ProductCategory.query.filter_by(restaurant_id=restaurant_id).all()
     # simple grouping
     cat_list = []
     for c in categories:
-        cat_list.append({"id": c.id, "name": c.name, "products": Product.query.filter_by(category_id=c.id, is_active=True).all()})
-    return render_template("customer/restaurant_detail.html", restaurant=restaurant, categories=cat_list)
+        cat_list.append(
+            {
+                "id": c.id,
+                "name": c.name,
+                "products": Product.query.filter_by(category_id=c.id, is_active=True).all(),
+            }
+        )
+    return render_template(
+        "customer/restaurant_detail.html",
+        restaurant=restaurant,
+        branch=branch,
+        avg_rating=f"{avg_rating:.1f}" if avg_rating is not None else "-",
+        categories=cat_list,
+    )
 
 
 @customer_bp.route("/customer/cart", endpoint="customer_cart")
@@ -160,7 +311,17 @@ def cart_add(product_id=None):
     gate = customer_required()
     if gate:
         return gate
-    pid = product_id or int(request.form.get("product_id", 0))
+    try:
+        pid = int(product_id or request.form.get("product_id", 0))
+    except (TypeError, ValueError):
+        pid = 0
+    if not pid:
+        flash("Invalid product.", "danger")
+        return _redirect_back()
+    product = Product.query.get(pid)
+    if not product or not product.is_active:
+        flash("Product not found or inactive.", "danger")
+        return _redirect_back()
     cart_data = _get_cart()
     cart_data[str(pid)] = cart_data.get(str(pid), 0) + 1
     session.modified = True
@@ -175,7 +336,10 @@ def cart_remove(product_id=None):
     gate = customer_required()
     if gate:
         return gate
-    pid = product_id or int(request.form.get("product_id", 0))
+    try:
+        pid = int(product_id or request.form.get("product_id", 0))
+    except (TypeError, ValueError):
+        pid = 0
     cart_data = _get_cart()
     cart_data.pop(str(pid), None)
     session.modified = True
@@ -187,7 +351,10 @@ def cart_remove(product_id=None):
 @customer_bp.route("/customer/cart/increase/<int:product_id>", methods=["POST"])
 @login_required
 def cart_increase(product_id=None):
-    pid = product_id or int(request.form.get("product_id", 0))
+    try:
+        pid = int(product_id or request.form.get("product_id", 0))
+    except (TypeError, ValueError):
+        pid = 0
     return cart_add(pid)
 
 
@@ -198,7 +365,10 @@ def cart_decrease(product_id=None):
     gate = customer_required()
     if gate:
         return gate
-    pid = product_id or int(request.form.get("product_id", 0))
+    try:
+        pid = int(product_id or request.form.get("product_id", 0))
+    except (TypeError, ValueError):
+        pid = 0
     cart_data = _get_cart()
     if str(pid) in cart_data:
         cart_data[str(pid)] = max(0, cart_data[str(pid)] - 1)
@@ -307,7 +477,10 @@ def order_complete():
         return redirect(url_for("customer_cart"))
     # Basit sipariş oluşturma (örnek)
     first_product = Product.query.get(int(next(iter(cart_data.keys()))))
-    restaurant_id = first_product.restaurant_id if first_product else None
+    if not first_product:
+        flash("Cart has invalid items.", "danger")
+        return redirect(url_for("customer_cart"))
+    restaurant_id = first_product.restaurant_id
     branch = _get_branch_for_restaurant(restaurant_id)
     if not branch:
         flash("Bu restoran için aktif bir şube tanımlı değil.", "danger")
@@ -361,8 +534,16 @@ def orders():
     gate = customer_required()
     if gate:
         return gate
-    orders_list = Order.query.filter_by(user_id=current_user.id).order_by(Order.id.desc()).all()
-    return render_template("customer/orders.html", orders=orders_list)
+    status_filter = request.args.get("status")
+    query = Order.query.filter_by(user_id=current_user.id)
+    if status_filter and is_valid_status(status_filter):
+        query = query.filter(Order.status == status_filter)
+    else:
+        status_filter = ""
+    page = request.args.get("page", 1, type=int)
+    per_page = 10
+    orders_list, page, pages, total = paginate(query.order_by(Order.id.desc()), page, per_page)
+    return render_template("customer/orders.html", orders=orders_list, status_filter=status_filter, page=page, pages=pages)
 
 
 @customer_bp.route("/customer/orders/<int:order_id>")
@@ -375,7 +556,9 @@ def order_detail(order_id):
     if order.user_id != current_user.id:
         flash("Bu sipariş size ait değil.", "danger")
         return redirect(url_for("customer_orders"))
-    return render_template("customer/order_detail.html", order=order, review=None)
+    review = Review.query.filter_by(order_id=order.id, user_id=current_user.id).first()
+    status_history = OrderStatusHistory.query.filter_by(order_id=order.id).order_by(OrderStatusHistory.changed_at.desc()).all()
+    return render_template("customer/order_detail.html", order=order, review=review, status_history=status_history)
 
 
 @customer_bp.route("/customer/orders/<int:order_id>/review", methods=["POST"])
@@ -385,6 +568,10 @@ def add_review(order_id):
     if gate:
         return gate
     order = Order.query.get_or_404(order_id)
+    existing = Review.query.filter_by(order_id=order.id, user_id=current_user.id).first()
+    if existing:
+        flash("Review already exists.", "warning")
+        return redirect(url_for("customer_orders"))
     rating = int(request.form.get("rating", 5))
     comment = request.form.get("comment")
     restaurant_id = order.branch.restaurant_id if order.branch else None
@@ -490,6 +677,24 @@ def addresses():
         title = (request.form.get("title") or "").strip() or "Adres"
         address_line = (request.form.get("address_line") or "").strip()
         neighborhood_id = int(request.form.get("neighborhood_id") or 0)
+        neighborhood_name = (request.form.get("neighborhood_name") or "").strip()
+        if not neighborhood_id and neighborhood_name:
+            city = City.query.filter_by(name="Istanbul").first()
+            if not city:
+                city = City(name="Istanbul")
+                db.session.add(city)
+                db.session.flush()
+            district = District.query.filter_by(city_id=city.id, name="Merkez").first()
+            if not district:
+                district = District(city_id=city.id, name="Merkez")
+                db.session.add(district)
+                db.session.flush()
+            neighborhood = Neighborhood.query.filter_by(district_id=district.id, name=neighborhood_name).first()
+            if not neighborhood:
+                neighborhood = Neighborhood(district_id=district.id, name=neighborhood_name)
+                db.session.add(neighborhood)
+                db.session.flush()
+            neighborhood_id = neighborhood.id
         if not address_line or not neighborhood_id:
             flash("Adres ve mahalle zorunlu.", "danger")
         else:

@@ -14,7 +14,7 @@
       {% for p in products %}
         <tr>
           <td>{{ p.name }}</td>
-          <td>{{ p.category_name }}</td>
+          <td>{{ p.category.name if p.category else '-' }}</td>
           <td>{{ p.price }}</td>
           <td>
             {% if p.is_active %}

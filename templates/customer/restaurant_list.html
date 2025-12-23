@@ -1,33 +1,40 @@
 {% extends "base.html" %}
 {% block title %}Restoranlar | HemenYe{% endblock %}
 {% block content %}
-<div class="row mb-3">
+<form class="row g-3 mb-3" method="GET">
+  <div class="col-lg-4">
+    <label class="form-label">Arama</label>
+    <input type="text" name="q" class="form-control" value="{{ search_query }}" placeholder="Restoran adi">
+  </div>
   <div class="col-lg-3">
-    <label class="form-label">Mutfak Türü</label>
-    <select class="form-select">
+    <label class="form-label">Mutfak Turu</label>
+    <select class="form-select" name="cuisine_id">
       <option value="">Hepsi</option>
       {% for c in cuisines %}
-        <option value="{{ c.id }}">{{ c.name }}</option>
+        <option value="{{ c.id }}" {% if selected_cuisine_id == c.id %}selected{% endif %}>{{ c.name }}</option>
       {% endfor %}
     </select>
   </div>
-  <div class="col-lg-3">
+  <div class="col-lg-2">
     <label class="form-label">Minimum Puan</label>
-    <select class="form-select">
+    <select class="form-select" name="min_rating">
+      <option value="">Hepsi</option>
       {% for s in [1,2,3,4,5] %}
-        <option value="{{ s }}">{{ s }}+</option>
+        <option value="{{ s }}" {% if selected_min_rating == s %}selected{% endif %}>{{ s }}+</option>
       {% endfor %}
     </select>
   </div>
-  <div class="col-lg-3">
-    <label class="form-label">Sıralama</label>
-    <select class="form-select">
-      <option>En çok puanlanan</option>
-      <option>En çok sipariş alan</option>
-      <option>En düşük min. paket</option>
+  <div class="col-lg-2">
+    <label class="form-label">Siralama</label>
+    <select class="form-select" name="sort">
+      <option value="rating" {% if selected_sort == 'rating' %}selected{% endif %}>En cok puanlanan</option>
+      <option value="min_order" {% if selected_sort == 'min_order' %}selected{% endif %}>En dusuk min. paket</option>
     </select>
   </div>
-</div>
+  <div class="col-lg-1 d-flex align-items-end">
+    <button class="btn btn-primary w-100">Uygula</button>
+  </div>
+</form>
 
 <div class="row g-3">
   {% for r in restaurants %}
@@ -35,14 +42,47 @@
       <div class="card h-100 shadow-sm">
         <div class="card-body">
           <h5>{{ r.name }}</h5>
-          <p class="text-muted small mb-1">{{ r.cuisines|join(', ') }}</p>
-          <p class="mb-2">Puan: <strong>{{ r.avg_rating }}</strong> · Min: {{ r.min_order }}</p>
-          <a class="btn btn-outline-primary w-100" href="/customer/restaurants/{{ r.id }}">Detayları gör</a>
+          <p class="text-muted small mb-1">
+            {% if r.cuisines %}
+              {{ r.cuisines|join(', ') }}
+            {% else %}
+              Cuisine not set
+            {% endif %}
+          </p>
+          {% if r.features %}
+            <div class="d-flex flex-wrap gap-1 mb-2">
+              {% for feature in r.features %}
+                <span class="badge bg-light text-dark border">{{ feature }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+          <p class="mb-1 text-muted small">Phone: {{ r.phone or '-' }}</p>
+          <p class="mb-2">Rating: <strong>{{ r.avg_rating }}</strong> | Min: {{ r.min_order }}</p>
+          <a class="btn btn-outline-primary w-100" href="/customer/restaurants/{{ r.id }}">Detaylari gor</a>
         </div>
       </div>
     </div>
   {% else %}
-    <div class="col-12 text-muted">Restoran bulunamadı.</div>
+    <div class="col-12 text-muted">Restoran bulunamadi.</div>
   {% endfor %}
 </div>
+
+{% if pages > 1 %}
+<nav class="mt-4">
+  <ul class="pagination justify-content-center">
+    <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+      <a class="page-link" href="{{ url_for('customer_restaurants', page=page-1, q=search_query, cuisine_id=selected_cuisine_id, min_rating=selected_min_rating, sort=selected_sort) }}">Prev</a>
+    </li>
+    {% for p in range(1, pages + 1) %}
+      <li class="page-item {% if p == page %}active{% endif %}">
+        <a class="page-link" href="{{ url_for('customer_restaurants', page=p, q=search_query, cuisine_id=selected_cuisine_id, min_rating=selected_min_rating, sort=selected_sort) }}">{{ p }}</a>
+      </li>
+    {% endfor %}
+    <li class="page-item {% if page >= pages %}disabled{% endif %}">
+      <a class="page-link" href="{{ url_for('customer_restaurants', page=page+1, q=search_query, cuisine_id=selected_cuisine_id, min_rating=selected_min_rating, sort=selected_sort) }}">Next</a>
+    </li>
+  </ul>
+</nav>
+{% endif %}
+
 {% endblock %}

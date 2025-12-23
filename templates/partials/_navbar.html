@@ -23,11 +23,18 @@
             <li class="nav-item"><a class="nav-link" href="{{ url_for('restaurant_orders') }}">Siparişler</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('restaurant_reviews') }}">Yorumlar</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('restaurant_support') }}">Destek</a></li>
+          {% elif current_user.role == 'admin' %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Panel</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_restaurants') }}">Restoranlar</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_orders') }}">Siparisler</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_products') }}">Urunler</a></li>
           {% endif %}
           <li class="nav-item"><a class="nav-link text-danger" href="{{ url_for('logout') }}">Çıkış Yap</a></li>
         {% else %}
           <li class="nav-item"><a class="nav-link" href="{{ url_for('customer_login') }}">Giriş Yap</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('customer_register') }}">Kayıt Ol</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('restaurant_login') }}">Restaurant Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_login') }}">Admin Login</a></li>
         {% endif %}
       </ul>
     </div>

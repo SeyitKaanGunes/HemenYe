@@ -7,6 +7,17 @@
       <div class="card-body">
         <h4 class="mb-3">{{ 'Düzenle' if product else 'Yeni Ürün' }}</h4>
         <form action="{{ form_action }}" method="POST">
+          {% if show_restaurant_select %}
+            <div class="mb-3">
+              <label class="form-label">Restaurant</label>
+              <select name="restaurant_id" class="form-select" required>
+                <option value="">Select restaurant</option>
+                {% for r in restaurants %}
+                  <option value="{{ r.id }}" {% if selected_restaurant_id == r.id %}selected{% endif %}>{{ r.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endif %}
           <div class="mb-3">
             <label class="form-label">Ürün Adı</label>
             <input type="text" name="name" class="form-control" value="{{ product.name if product }}" required>
@@ -18,7 +29,7 @@
           <div class="row">
             <div class="mb-3 col-md-6">
               <label class="form-label">Kategori</label>
-              <select name="category_id" class="form-select">
+              <select name="category_id" class="form-select" required>
                 {% for c in categories %}
                   <option value="{{ c.id }}" {% if product and product.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>
                 {% endfor %}
@@ -26,7 +37,7 @@
             </div>
             <div class="mb-3 col-md-6">
               <label class="form-label">Fiyat</label>
-              <input type="number" step="0.01" name="price" class="form-control" value="{{ product.price if product }}">
+              <input type="number" step="0.01" min="0" name="price" class="form-control" value="{{ product.price if product }}" required>
             </div>
           </div>
           <div class="form-check mb-3">

@@ -6,13 +6,13 @@
     <div class="d-flex justify-content-between">
       <div>
         <h4>Sipariş #{{ order.id }}</h4>
-        <p class="mb-1">Restoran: {{ order.restaurant_name }}</p>
-        <p class="mb-1">Adres: {{ order.address }}</p>
-        <p class="text-muted">Tarih: {{ order.date }}</p>
+        <p class="mb-1">Restoran: {{ order.branch.restaurant.name if order.branch and order.branch.restaurant else '-' }}</p>
+        <p class="mb-1">Adres: {{ order.address.address_line if order.address else '-' }}</p>
+        <p class="text-muted">Tarih: -</p>
       </div>
       <div class="text-end">
-        <span class="badge bg-secondary">{{ order.status }}</span>
-        <p class="fw-semibold mb-0">{{ order.total }}</p>
+        <span class="badge bg-secondary">{{ order.status|replace('_', ' ')|title }}</span>
+        <p class="fw-semibold mb-0">{{ order.final_amount }}</p>
       </div>
     </div>
   </div>
@@ -25,17 +25,33 @@
       {% for item in order.items %}
         <li class="list-group-item d-flex justify-content-between">
           <div>
-            <div>{{ item.name }}</div>
+            <div>{{ item.product.name if item.product else 'Item' }}</div>
             <small class="text-muted">Adet: {{ item.quantity }}</small>
           </div>
-          <strong>{{ item.total_price }}</strong>
+          <strong>{{ item.unit_price * item.quantity }}</strong>
         </li>
       {% endfor %}
     </ul>
   </div>
 </div>
 
-{% if order.status == 'DELIVERED' %}
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h5>Status History</h5>
+    <ul class="list-group list-group-flush">
+      {% for h in status_history %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span>{{ h.old_status }} -> {{ h.new_status }}</span>
+          <small class="text-muted">{{ h.changed_at }}</small>
+        </li>
+      {% else %}
+        <li class="list-group-item text-muted">No history.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+{% if order.status == 'delivered' %}
 <div class="card shadow-sm">
   <div class="card-body">
     <h5>Yorum Bırak</h5>
@@ -59,7 +75,7 @@
       {% if review.reply %}
         <div class="mt-2 ps-3 border-start">
           <small class="text-muted">Restoran cevabı:</small>
-          <p class="mb-0">{{ review.reply }}</p>
+          <p class="mb-0">{{ review.reply.message }}</p>
         </div>
       {% endif %}
     {% endif %}

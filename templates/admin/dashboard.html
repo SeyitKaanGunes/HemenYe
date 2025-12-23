@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard | HemenYe{% endblock %}
+{% block content %}
+<div class="card shadow-sm mb-3">
+  <div class="card-body">
+    <h4 class="mb-0">Admin Dashboard</h4>
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Total Users</div>
+        <div class="display-6">{{ stats.users }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Restaurants</div>
+        <div class="display-6">{{ stats.restaurants }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Orders</div>
+        <div class="display-6">{{ stats.orders }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

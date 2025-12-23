@@ -13,7 +13,7 @@
                 <div>#{{ t.id }} · {{ t.order_ref }}</div>
                 <small class="text-muted">{{ t.created_at }}</small>
               </div>
-              <span class="badge bg-secondary">{{ t.status }}</span>
+              <span class="badge bg-secondary">{{ t.status|replace('_', ' ')|title }}</span>
             </li>
           {% else %}
             <li class="list-group-item text-muted">Talep yok.</li>
